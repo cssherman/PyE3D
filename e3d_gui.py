@@ -9,10 +9,32 @@ from tkFileDialog import askopenfilename, asksaveasfilename
 class GUIFramework(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
-        #self.master.geometry("%dx%d+%d+%d" % (750, 450, 0, 0))
-        self.master.configure(background='gray91')
-        self.grid(padx=15, pady=15, sticky=N + S + E + W)
         os.system('clear')
+        self.master.geometry("%dx%d+%d+%d" % (700, 700, 0, 0))
+        self.grid(padx=15, pady=15, sticky=N + S + E + W)
+
+        # Theme configuration
+        ttkstyle = ttk.Style()
+        try:
+            # OS X Default Theme
+            ttkstyle.theme_use('aqua')
+            self.master.configure(background='gray91')
+            ttkstyle.configure('.', font='TkDefaultFont 10')
+
+        except:
+            # Modified Linux Theme
+            ttkstyle.theme_use('clam')
+            self.master.configure(background='gray85')
+            ttkstyle.configure('.', font='TkDefaultFont 10')
+            ttkstyle.configure('TButton', padding=1, background='gray80')
+            ttkstyle.configure('TCombobox', padding=2)
+            ttkstyle.map('TCombobox', fieldbackground=[('readonly', 'focus', 'gray90'), ('readonly', 'gray90')])
+            ttkstyle.map('TEntry', selectbackground=[('!disabled', 'gray90')], selectforeground=[('!disabled', 'black')])
+            ttkstyle.configure('TFrame', background='gray85')
+            ttkstyle.configure('TLabel', background='gray85', padding=4)
+            ttkstyle.configure('TNotebook', background='gray85')
+
+
         self.config = Config()
         self.master.title("PyE3D Gui")
         self.Create_Main()
@@ -20,6 +42,7 @@ class GUIFramework(Frame):
     def Create_Main(self):
         # Create notebook and subframes
         self.nb = ttk.Notebook(self.master)
+        self.nb.grid(padx=10, pady=10)
         #self.f1 = ttk.Frame(width=700, height=300)
         self.f1 = ttk.Frame()
         self.f2 = ttk.Frame()
@@ -100,11 +123,11 @@ class GUIFramework(Frame):
         # Material Options (Frame 3)
         #-----------------------------------------------------------------------------------
         self.materialframes = ttk.Notebook(self.f3)
-        self.materialframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S)
+        self.materialframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S, padx=5, pady=5)
         self.Create_MaterialFrames(len(self.config.material))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f3, text='Number of Regions:', font='helvetica 12 bold italic'))
+        self.lbText.append(ttk.Label(self.f3, text='Number of Regions:', font='TkDefaultFont 10 italic'))
         self.nmat = ttk.Label(self.f3, text='1')
         self.btn_addmat = ttk.Button(self.f3, text='Add Region', width=15, command=self.GUI_AddMat)
         self.btn_delmat = ttk.Button(self.f3, text='Remove Region', width=15, command=self.GUI_DelMat)
@@ -120,11 +143,11 @@ class GUIFramework(Frame):
         # Source Options (Frame 4)
         #-----------------------------------------------------------------------------------
         self.sourceframes = ttk.Notebook(self.f4)
-        self.sourceframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S)
+        self.sourceframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S, padx=5, pady=5)
         self.Create_SourceFrames(len(self.config.source))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f4, text='Number of Sources:', font='helvetica 12 bold italic'))
+        self.lbText.append(ttk.Label(self.f4, text='Number of Sources:', font='TkDefaultFont 10 italic'))
         self.nsource = ttk.Label(self.f4, text='1')
         self.btn_addsource = ttk.Button(self.f4, text='Add Source', width=15, command=self.GUI_AddSource)
         self.btn_delsource = ttk.Button(self.f4, text='Remove Source', width=15, command=self.GUI_DelSource)
@@ -138,11 +161,11 @@ class GUIFramework(Frame):
         # Traces (Frame 5)
         #-----------------------------------------------------------------------------------
         self.traceframes = ttk.Notebook(self.f5)
-        self.traceframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S)
+        self.traceframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S, padx=5, pady=5)
         self.Create_TraceFrames(len(self.config.output.traces))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f5, text='Number of Traces:', font='helvetica 12 bold italic'))
+        self.lbText.append(ttk.Label(self.f5, text='Number of Traces:', font='TkDefaultFont 10 italic'))
         self.ntrace = ttk.Label(self.f5, text='1')
         self.btn_addtrace = ttk.Button(self.f5, text='Add Trace', width=15, command=self.GUI_AddTrace)
         self.btn_deltrace = ttk.Button(self.f5, text='Remove Trace', width=15, command=self.GUI_DelTrace)
@@ -155,13 +178,12 @@ class GUIFramework(Frame):
         #-----------------------------------------------------------------------------------
         # Movies (Frame 6)
         #-----------------------------------------------------------------------------------
-        # Source Frames
         self.movieframes = ttk.Notebook(self.f6)
-        self.movieframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S)
+        self.movieframes.grid(row=0, column=0, columnspan=5, sticky=N + W + E + S, padx=5, pady=5)
         self.Create_MovieFrames(len(self.config.output.movies))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f6, text='Number of Movies:', font='helvetica 12 bold italic'))
+        self.lbText.append(ttk.Label(self.f6, text='Number of Movies:', font='TkDefaultFont 10 italic'))
         self.nmovie = ttk.Label(self.f6, text='1')
         self.btn_addmovie = ttk.Button(self.f6, text='Add Movie', width=15, command=self.GUI_AddMovie)
         self.btn_delmovie = ttk.Button(self.f6, text='Remove Movie', width=15, command=self.GUI_DelMovie)
@@ -306,7 +328,8 @@ class GUIFramework(Frame):
 
             # Configuration
             seprow = []
-            txt = ['Trace Direction:', '', 'Origin:', '   X', '   Y', '   Z', 'Number:', '   N', 'Spacing:', '   S', '', 'Corrections:']
+            txt = ['Trace Direction:', '', 'Origin:', '   X', '   Y', '   Z', 'Number:', '   N', 'Spacing:', '   S', '',
+                   'Corrections:']
             txtrow = [0, 1, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6]
             txtcol = [0, 0, 0, 1, 3, 5, 0, 1, 0, 1, 0, 0]
             txtbold = []
@@ -334,13 +357,13 @@ class GUIFramework(Frame):
             lbText.append(ttk.Label(frame, text=txt[ii]))
             lbText[ii].grid(row=txtrow[ii], column=txtcol[ii], sticky=W)
         for ii in txtbold:
-                lbText[ii].config(font='helvetica 12 bold italic')
+            lbText[ii].config(font='TkDefaultFont 10 bold italic')
 
         # Entries
         enText = []
         for ii in range(0, len(enrow)):
             enText.append(ttk.Entry(frame, width=12))
-            enText[ii].grid(row=enrow[ii], column=encol[ii])
+            enText[ii].grid(row=enrow[ii], column=encol[ii], padx=2)
 
         # Dropdown Boxes
         drBox = []
