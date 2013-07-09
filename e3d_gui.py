@@ -3,6 +3,7 @@ from e3d_classes import *
 from Tkinter import *
 import e3d_main
 import ttk
+import tkFont
 from tkFileDialog import askopenfilename, asksaveasfilename
 
 
@@ -10,7 +11,7 @@ class GUIFramework(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
         os.system('clear')
-        self.master.geometry("%dx%d+%d+%d" % (700, 700, 0, 0))
+        self.master.geometry("%dx%d+%d+%d" % (710, 700, 0, 0))
         self.grid(padx=15, pady=15, sticky=N + S + E + W)
 
         # Theme configuration
@@ -19,13 +20,16 @@ class GUIFramework(Frame):
             # OS X Default Theme
             ttkstyle.theme_use('aqua')
             self.master.configure(background='gray91')
-            ttkstyle.configure('.', font='TkDefaultFont 10')
+            ttkstyle.configure('TFrame', background='gray91')
+            ttkstyle.configure('TNotebook', background='gray91')
+            self.BasicFont = tkFont.Font(family='Lucida Grande', size=12, weight='normal', slant='roman')
+            self.HighlightFont = tkFont.Font(family='Helvetica', size=12, weight='bold', slant='italic')
+            self.HighlightFont2 = tkFont.Font(family='Helvetica', size=12, weight='normal', slant='italic')
 
         except:
-            # Modified Linux Theme
+            # Modified Ubuntu Theme
             ttkstyle.theme_use('clam')
             self.master.configure(background='gray85')
-            ttkstyle.configure('.', font='TkDefaultFont 10')
             ttkstyle.configure('TButton', padding=1, background='gray80')
             ttkstyle.configure('TCombobox', padding=2)
             ttkstyle.map('TCombobox', fieldbackground=[('readonly', 'focus', 'gray90'), ('readonly', 'gray90')])
@@ -33,7 +37,10 @@ class GUIFramework(Frame):
             ttkstyle.configure('TFrame', background='gray85')
             ttkstyle.configure('TLabel', background='gray85', padding=4)
             ttkstyle.configure('TNotebook', background='gray85')
-
+            self.BasicFont = tkFont.Font(family='DejaVu Sans', size=10, weight='normal', slant='roman')
+            self.HighlightFont = tkFont.Font(family='DejaVu Sans', size=10, weight='bold', slant='italic')
+            self.HighlightFont2 = tkFont.Font(family='DejaVu Sans', size=10, weight='normal', slant='italic')
+        ttkstyle.configure('.', font=self.BasicFont)
 
         self.config = Config()
         self.master.title("PyE3D Gui")
@@ -127,7 +134,7 @@ class GUIFramework(Frame):
         self.Create_MaterialFrames(len(self.config.material))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f3, text='Number of Regions:', font='TkDefaultFont 10 italic'))
+        self.lbText.append(ttk.Label(self.f3, text='Number of Regions:', font=self.HighlightFont2))
         self.nmat = ttk.Label(self.f3, text='1')
         self.btn_addmat = ttk.Button(self.f3, text='Add Region', width=15, command=self.GUI_AddMat)
         self.btn_delmat = ttk.Button(self.f3, text='Remove Region', width=15, command=self.GUI_DelMat)
@@ -147,7 +154,7 @@ class GUIFramework(Frame):
         self.Create_SourceFrames(len(self.config.source))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f4, text='Number of Sources:', font='TkDefaultFont 10 italic'))
+        self.lbText.append(ttk.Label(self.f4, text='Number of Sources:', font=self.HighlightFont2))
         self.nsource = ttk.Label(self.f4, text='1')
         self.btn_addsource = ttk.Button(self.f4, text='Add Source', width=15, command=self.GUI_AddSource)
         self.btn_delsource = ttk.Button(self.f4, text='Remove Source', width=15, command=self.GUI_DelSource)
@@ -165,7 +172,7 @@ class GUIFramework(Frame):
         self.Create_TraceFrames(len(self.config.output.traces))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f5, text='Number of Traces:', font='TkDefaultFont 10 italic'))
+        self.lbText.append(ttk.Label(self.f5, text='Number of Traces:', font=self.HighlightFont2))
         self.ntrace = ttk.Label(self.f5, text='1')
         self.btn_addtrace = ttk.Button(self.f5, text='Add Trace', width=15, command=self.GUI_AddTrace)
         self.btn_deltrace = ttk.Button(self.f5, text='Remove Trace', width=15, command=self.GUI_DelTrace)
@@ -183,7 +190,7 @@ class GUIFramework(Frame):
         self.Create_MovieFrames(len(self.config.output.movies))
 
         # Basic Information
-        self.lbText.append(ttk.Label(self.f6, text='Number of Movies:', font='TkDefaultFont 10 italic'))
+        self.lbText.append(ttk.Label(self.f6, text='Number of Movies:', font=self.HighlightFont2))
         self.nmovie = ttk.Label(self.f6, text='1')
         self.btn_addmovie = ttk.Button(self.f6, text='Add Movie', width=15, command=self.GUI_AddMovie)
         self.btn_delmovie = ttk.Button(self.f6, text='Remove Movie', width=15, command=self.GUI_DelMovie)
@@ -357,7 +364,8 @@ class GUIFramework(Frame):
             lbText.append(ttk.Label(frame, text=txt[ii]))
             lbText[ii].grid(row=txtrow[ii], column=txtcol[ii], sticky=W)
         for ii in txtbold:
-            lbText[ii].config(font='TkDefaultFont 10 bold italic')
+            #lbText[ii].config(font='TkDefaultFont %i bold italic' % (self.txtsize))
+            lbText[ii].config(font=self.HighlightFont)
 
         # Entries
         enText = []
