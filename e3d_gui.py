@@ -9,6 +9,7 @@ from tkFileDialog import askopenfilename, asksaveasfilename
 
 class GUIFramework(Frame):
     def __init__(self, master=None):
+        self.config = Config()
         Frame.__init__(self, master)
         os.system('clear')
         self.master.geometry("%dx%d+%d+%d" % (710, 700, 0, 0))
@@ -42,9 +43,11 @@ class GUIFramework(Frame):
             self.HighlightFont2 = tkFont.Font(family='DejaVu Sans', size=10, weight='normal', slant='italic')
         ttkstyle.configure('.', font=self.BasicFont)
 
-        self.config = Config()
         self.master.title("PyE3D Gui")
         self.Create_Main()
+
+    def quit(self):
+        self.master.quit()
 
     def Create_Main(self):
         # Create notebook and subframes
@@ -397,7 +400,7 @@ class GUIFramework(Frame):
         self.enText[7].insert(0, self.config.model.spacing[1])
         self.enText[8].insert(0, self.config.model.spacing[2])
         self.enText[9].insert(0, self.config.model.time)
-        self.drBox[0].current(self.config.boundary.type)
+        self.drBox[0].current(self.config.boundary.type - 1)
         self.drBox[1].current(self.config.boundary.sponge)
         self.drBox[2].current(self.config.boundary.atten)
         self.drBox[3].current(self.config.basic.run)
@@ -502,7 +505,7 @@ class GUIFramework(Frame):
             self.source_enText[ii][0].insert(0, self.config.source[ii].amp)
             self.source_enText[ii][1].insert(0, self.config.source[ii].freq)
             self.source_enText[ii][2].insert(0, self.config.source[ii].off)
-            self.source_drBox[ii][0].current(self.config.source[ii].type)
+            self.source_drBox[ii][0].current(self.config.source[ii].type - 1)
             self.source_drBox[ii][1].current(self.config.source[ii].wav)
             stype = self.source_drBox[ii][0].get()
             for jj in range(3, 6):
@@ -594,7 +597,7 @@ class GUIFramework(Frame):
         self.config.model.number[1] = int(self.config.model.size[1] / self.config.model.spacing[1])
         self.config.model.number[2] = int(self.config.model.size[2] / self.config.model.spacing[2])
         self.config.model.time = float(self.enText[9].get())
-        self.config.boundary.type = self.drBox[0].current()
+        self.config.boundary.type = self.drBox[0].current() + 1
         self.config.boundary.sponge = self.drBox[1].current()
         self.config.boundary.atten = self.drBox[2].current()
         self.config.basic.run = self.drBox[3].current()
@@ -640,7 +643,7 @@ class GUIFramework(Frame):
             self.config.source[ii].amp = float(self.source_enText[ii][0].get())
             self.config.source[ii].freq = float(self.source_enText[ii][1].get())
             self.config.source[ii].off = float(self.source_enText[ii][2].get())
-            self.config.source[ii].type = self.source_drBox[ii][0].current()
+            self.config.source[ii].type = self.source_drBox[ii][0].current() + 1
             self.config.source[ii].wav = self.source_drBox[ii][1].current()
             for jj in range(3, 6):
                     self.config.source[ii].loc[jj - 3] = float(self.source_enText[ii][jj].get())

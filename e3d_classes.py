@@ -81,7 +81,7 @@ class Basic:
 class Boundary:
     def __init__(self):
         #Boundary Configuration
-        self.type = 2
+        self.type = 3
         self.sponge = 0
         self.atten = 1
         self.atten_thick = 25
@@ -117,7 +117,7 @@ class Model:
 class Movies:
     def __init__(self):
         self.dir = 'z'
-        self.loc = 0.0
+        self.loc = 0.5
         self.type = 13
 
 
@@ -137,7 +137,7 @@ class Output:
         self.sres = 50                # Screen resolution
         self.dpi = 150                # Print resolution
         self.fsize = (4, 3)           # Print size
-        self.scale_sat = 50           # Colorbar saturation
+        self.scale_sat = 1            # Colorbar saturation
 
         #Add one trace and movie by default
         self.movies = [Movies()]
@@ -253,7 +253,7 @@ class Mfile:
             return vimg, vtitle
 
         ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
-        ani.save("./%s.mp4" % self.type, fps=30, extra_args=['-vcodec', 'libx264'])
+        ani.save("./%s.mp4" % self.type, fps=30, codec='libx264')
         #plt.ion()
         #plt.show()		# Showing plot prevents other files from rendering
         #plt.close()
@@ -310,28 +310,28 @@ class Tfile:
         off = 0
         for trace in traces:
             self.v.append(tmp2[off:off + trace.N])
-            self.x.append(linspace(0, trace.N * trace.space, trace.N))
+            self.x.append(array(linspace(0, trace.N * trace.space, trace.N)))
             self.loc.append(trace.loc)
-            self.dir.append(trace.dir)
+            self.dir.append(trace.dir.lower())
             self.corr.append(trace.corr)
 
     def correct(self, source):
         comp = {'x': [0, 1, 2], 'y': [1, 0, 2], 'z': [2, 0, 1]}
         for ii in range(0, len(self.v)):
-            r = sqrt((self.x[ii] - source.loc[comp[self.dir][0]]) ** 2
-                     + (self.loc[comp[self.dir][1]] - source.loc[comp[self.dir][0]]) ** 2
-                     + (self.loc[comp[self.dir][2]] - source.loc[comp[self.dir][0]]) ** 2)
-            if (self.corr[ii] == 1):
-                self.v[ii] = self.v[ii] * r
-            elif (self.corr[ii] == 2):
-                r = sqrt(r)
-                self.v[ii] = self.v[ii] * r
+            r = sqrt((self.x[ii] - source.loc[comp[self.dir[ii]][0]]) ** 2
+                     + (self.loc[ii][comp[self.dir[ii]][1]] - source.loc[comp[self.dir[ii]][0]]) ** 2
+                     + (self.loc[ii][comp[self.dir[ii]][2]] - source.loc[comp[self.dir[ii]][0]]) ** 2)
+            if (self.corr[ii] > 0):
+                if (self.corr[ii] == 2):
+                    r = sqrt(r)
+                for jj in range(0, size(self.v[ii], 0)):
+                    self.v[ii][jj][:] = self.v[ii][jj][:] * r[jj]
 
     def plot(self, output):
         plt.figure(figsize=output.fsize, dpi=output.dpi)
         for ii in range(0, len(self.v)):
             imsize = [self.t[0], self.t[-1], self.x[ii][-1], self.x[ii][0]]
-            lim = amax(absolute(self.v[ii])) / output.scalesat
+            lim = amax(absolute(self.v[ii])) / output.scale_sat
             plt.imshow(self.v[ii], extent=imsize, vmin=-lim, vmax=lim, cmap=cm.gray, origin='upper')
             plt.title("%s-Velocity for Trace #%i" % (self.comp.upper(), ii))
             plt.xlabel('Time (s)')
@@ -339,7 +339,6 @@ class Tfile:
             plt.colorbar()
             plt.savefig("Trace_%i_v%s.pdf" % (ii, self.comp))
             plt.clf()
-        plt.close()
 
 
 # Movie files
@@ -437,7 +436,7 @@ class Vfile:
 
         ani = animation.FuncAnimation(fig, animate, frames=self.v.shape[2], interval=20, blit=False, repeat=False)
         if (self.writestep == 0):
-            ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, extra_args=['-vcodec', 'libx264'])
+            ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264')
         else:
             ani.save("./%s_%s_%s_%i.mp4" % (self.dir, self.loc, self.type, self.writestep), fps=30,
                      extra_args=['-vcodec', 'libx264'])

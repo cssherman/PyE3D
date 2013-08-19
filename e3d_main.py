@@ -8,7 +8,7 @@ def run_simulation():
 
     # Setup the linking and working directory
     if os.path.exists(config.path.link):
-        tdir = glob.glob(config.path.link + '/1*')
+        tdir = sorted(glob.glob(config.path.link + '/1*'))
         if tdir:
             link_off = float(tdir[-1][-3:]) + 1
         else:
@@ -33,7 +33,7 @@ def run_simulation():
         # Setup and link the working directory
         today = strftime('%d-%b-%Y', localtime())
         if os.path.exists(config.path.out + today):
-            tdir = glob.glob(config.path.out + today + '/1*')
+            tdir = sorted(glob.glob(config.path.out + today + '/1*'))
             if tdir:
                 work_off = float(tdir[-1][-3:]) + 1
             else:
@@ -68,7 +68,7 @@ def run_simulation():
         inputsize = []
 
         # Choose which material files to write
-        if (config.basic.acoust == 1):
+        if (config.basic.acoust == 2):
             config.basic.atten = 0
             config.basic.degrees_free = 1
             n_inputs = 1
@@ -276,7 +276,7 @@ def run_simulation():
                     print 'Plotting movies'
                     movfile = Vfile()
                     for mov in config.output.movies:
-                        movfile.load(config.model, config.basic.multicore, "%s_%s.%s" % (mov.dir, mov.loc, mtype[mov.type - 11]))
+                        movfile.load(config.model, config.basic.multicore, "%s_%s.%s" % (mov.dir.lower(), mov.loc, mtype[mov.type - 11]))
                         movfile.read()
                         movfile.plot(config.output)
                 except:
@@ -451,8 +451,8 @@ def run_post():
                 print("Rendering movies")
                 movfile = Vfile()
                 for mov in tmp_config.output.movies:
-                    print("     ./%s_%s.%s" % (mov.dir, mov.loc, mtype[mov.type - 11]))
-                    movfile.load(tmp_config.model, tmp_config.basic.multicore, "%s_%s.%s" % (mov.dir, mov.loc, mtype[mov.type - 11]))
+                    print("     ./%s_%s.%s" % (mov.dir.lower(), mov.loc, mtype[mov.type - 11]))
+                    movfile.load(tmp_config.model, tmp_config.basic.multicore, "%s_%s.%s" % (mov.dir.lower(), mov.loc, mtype[mov.type - 11]))
                     movfile.read()
                     movfile.plot(config.output)
                 del movfile
