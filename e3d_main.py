@@ -263,11 +263,25 @@ def run_simulation():
             # Render any outputs
             if (config.output.trace == 1):
                 try:
-                    print 'Plotting Traces'
+                    print("Rendering traces")
                     tracefile = Tfile()
-                    tracefile.all('out.0.TVx', config.output.traces, config.source[0], config.output)
-                    tracefile.all('out.0.TVy', config.output.traces, config.source[0], config.output)
-                    tracefile.all('out.0.TVz', config.output.traces, config.source[0], config.output)
+
+                    print("     ./out.0.TVx")
+                    tracefile.read('out.0.TVx', tmp_config.output.traces)
+                    tracefile.correct(tmp_config.source[0])
+                    tracefile.plot(config.output)
+
+                    print("     ./out.0.TVy")
+                    tracefile.read('out.0.TVy', tmp_config.output.traces)
+                    tracefile.correct(tmp_config.source[0])
+                    tracefile.plot(config.output)
+
+                    print("     ./out.0.TVz")
+                    tracefile.read('out.0.TVz', tmp_config.output.traces)
+                    tracefile.correct(tmp_config.source[0])
+                    tracefile.plot(config.output)
+
+                    del tracefile
                 except:
                     print '(traces not rendered)'
 

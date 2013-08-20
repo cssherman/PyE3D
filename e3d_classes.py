@@ -253,7 +253,7 @@ class Mfile:
             return vimg, vtitle
 
         ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
-        ani.save("./%s.mp4" % self.type, fps=30, codec='libx264')
+        ani.save("./%s.mp4" % self.type, fps=30, codec='libx264', bitrate=1800)
         #plt.ion()
         #plt.show()		# Showing plot prevents other files from rendering
         #plt.close()
@@ -436,10 +436,9 @@ class Vfile:
 
         ani = animation.FuncAnimation(fig, animate, frames=self.v.shape[2], interval=20, blit=False, repeat=False)
         if (self.writestep == 0):
-            ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264')
+            ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264', bitrate=1800)
         else:
-            ani.save("./%s_%s_%s_%i.mp4" % (self.dir, self.loc, self.type, self.writestep), fps=30,
-                     extra_args=['-vcodec', 'libx264'])
+            ani.save("./%s_%s_%s_%i.mp4" % (self.dir, self.loc, self.type, self.writestep), fps=30, codec='libx264', bitrate=1800)
         self.writestep += 1
 
 
