@@ -205,7 +205,7 @@ def run_simulation():
                 fid.write(" damp=10 adamp=0.95")
             fid.write(" model=%i b=%i" % (config.basic.acoust, config.boundary.type))
             if (config.basic.atten == 1):
-                fid.write("q=1")
+                fid.write(" q=1")
             fid.write('\n')
 
             # MPI options
