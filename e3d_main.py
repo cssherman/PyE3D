@@ -85,6 +85,10 @@ def run_simulation():
             n_regions = len(config.material)
             #wh_steps = (n_regions + 1) * (n_inputs + 1)
 
+            # 2D/3D
+            if (config.model.dims == 2):
+                config.model.number[1] = 1
+
             # Locate materials and boundaries
             for ii in range(0, n_regions):
                 e3d_locate(config.model, config.material[ii].type, config.material[ii].geo, ii)
@@ -164,8 +168,8 @@ def run_simulation():
 
         # Grid and input file sizes
         for ii in range(0, 3):
-            gridsize.append(max(config.model.number[0] - 1, 1)) 	# n, m, l
-            inputsize.append(config.model.number[0] - 1)			# n2, m2, l2
+            gridsize.append(max(config.model.number[ii] - 1, 1)) 	# n, m, l
+            inputsize.append(config.model.number[ii] - 1)			# n2, m2, l2
 
         # Check the seismic source frequency
         freqlim = min(1 / (2 * config.model.dt), config.model.v_min[0] / (10 * config.model.spacing[0]))
@@ -182,7 +186,8 @@ def run_simulation():
             ntrace = 0
             for trace in config.output.traces:
                 tmp = tile(trace.loc, (trace.N, 1))
-                tmp[:, comp[trace.dir]] = tmp[:, comp[trace.dir]] + linspace(0, trace.N * trace.space, trace.N)
+                tmp[:, comp[trace.dir]] = tmp[:, comp[trace.dir]] + arange(0, trace.N) * trace.space
+                # tmp[:, comp[trace.dir]] = tmp[:, comp[trace.dir]] + linspace(0, trace.N * trace.space, trace.N)
                 if (ntrace == 0):
                     tracefile = tmp
                 else:
@@ -200,7 +205,7 @@ def run_simulation():
         print("\nWriting E3D input file")
         with open(config.path.fin, 'w') as fid:
             # Grid options
-            fid.write("grid n=%i m=%i l=%i dh=%s" % (gridsize[0], gridsize[1], gridsize[2], config.model.spacing[0]))
+            fid.write("grid n=%i l=%i m=%i dh=%s" % (gridsize[0], gridsize[1], gridsize[2], config.model.spacing[0]))
             if (config.boundary.sponge == 1):
                 fid.write(" damp=10 adamp=0.95")
             fid.write(" model=%i b=%i" % (config.basic.acoust, config.boundary.type))
@@ -221,7 +226,7 @@ def run_simulation():
                 fid.write(" Qp=%s Qs=%s Qf=%s" % (config.material[0].mn[3], config.material[0].mn[4], fmean))
             fid.write("\n")
             for ii in range(0, n_inputs):
-                fid.write("vfile type=%s file=\"%s.pv\" n1=0 n2=%i m1=0 m2=%i l1=0 l2=%i\n" % (ft2[ii], ft[ii], inputsize[0], inputsize[1], inputsize[2]))
+                fid.write("vfile type=%s file=\"%s.pv\" n1=0 n2=%i l1=0 l2=%i m1=0 m2=%i\n" % (ft2[ii], ft[ii], inputsize[0], inputsize[1], inputsize[2]))
 
             # Source options
             for ss in config.source:
@@ -267,34 +272,37 @@ def run_simulation():
                     tracefile = Tfile()
 
                     print("     ./out.0.TVx")
-                    tracefile.read('out.0.TVx', tmp_config.output.traces)
-                    tracefile.correct(tmp_config.source[0])
+                    tracefile.read('out.0.TVx', config.output.traces)
+                    tracefile.correct(config.source[0])
                     tracefile.plot(config.output)
 
-                    print("     ./out.0.TVy")
-                    tracefile.read('out.0.TVy', tmp_config.output.traces)
-                    tracefile.correct(tmp_config.source[0])
-                    tracefile.plot(config.output)
+                    if (config.model == 3):
+                        print("     ./out.0.TVy")
+                        tracefile.read('out.0.TVy', config.output.traces)
+                        tracefile.correct(config.source[0])
+                        tracefile.plot(config.output)
 
                     print("     ./out.0.TVz")
-                    tracefile.read('out.0.TVz', tmp_config.output.traces)
-                    tracefile.correct(tmp_config.source[0])
+                    tracefile.read('out.0.TVz', config.output.traces)
+                    tracefile.correct(config.source[0])
                     tracefile.plot(config.output)
 
                     del tracefile
                 except:
-                    print '(traces not rendered)'
+                    print("     (No trace files rendered)")
 
             if (config.output.movie == 1):
                 try:
-                    print 'Plotting movies'
+                    print("Rendering movies")
                     movfile = Vfile()
                     for mov in config.output.movies:
+                        print("     ./%s_%s.%s" % (mov.dir.lower(), mov.loc, mtype[mov.type - 11]))
                         movfile.load(config.model, config.basic.multicore, "%s_%s.%s" % (mov.dir.lower(), mov.loc, mtype[mov.type - 11]))
                         movfile.read()
                         movfile.plot(config.output)
+                    del movfile
                 except:
-                    print '(movies not rendered)'
+                    print("     (No movie files rendered)")
 
     # Cleanup
     log.close()
@@ -446,10 +454,11 @@ def run_post():
                 tracefile.correct(tmp_config.source[0])
                 tracefile.plot(config.output)
 
-                print("     ./out.0.TVy")
-                tracefile.read('out.0.TVy', tmp_config.output.traces)
-                tracefile.correct(tmp_config.source[0])
-                tracefile.plot(config.output)
+                if (config.model == 3):
+                    print("     ./out.0.TVy")
+                    tracefile.read('out.0.TVy', tmp_config.output.traces)
+                    tracefile.correct(tmp_config.source[0])
+                    tracefile.plot(config.output)
 
                 print("     ./out.0.TVz")
                 tracefile.read('out.0.TVz', tmp_config.output.traces)

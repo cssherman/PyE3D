@@ -12,7 +12,7 @@ from scipy import signal
 import matplotlib.animation as animation
 from matplotlib.patches import Patch
 from time import localtime, strftime
-
+from matplotlib import verbose
 
 #--------------------------------------------------------------------
 #				Configuration Data
@@ -236,27 +236,40 @@ class Mfile:
             tmp.astype('float32').tofile(fid)
 
     def plot(self, model, output):
-        Z = linspace(0, model.number[2] * model.spacing[2], model.number[2]) + model.spacing[2]
-        imsize = [model.origin[0], model.size[0] + model.origin[0], model.origin[1], model.size[1] + model.origin[1]]
-        fig = plt.figure(figsize=(output.hres / output.sres, output.hres / (output.sres * output.hratio)),
-                         dpi=output.sres)
-        vimg = plt.imshow(self.v[:, :, 0], extent=imsize, vmin=round(amin(self.v), 1) - 0.05, vmax=round(amax(self.v) + 0.05, 1),
-                          cmap=cm.jet)
-        vtitle = plt.title('')
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        plt.colorbar()
 
-        def animate(ii):
-            vimg.set_array(self.v[:, :, ii])
-            vtitle.set_text("%s Plot (Z = %1.2fkm)" % (self.name, Z[ii]))
-            return vimg, vtitle
+        if (model.dims == 2):
+            plt.figure
+            imsize = [model.origin[0], model.size[0] + model.origin[0], model.size[2] + model.origin[2], model.origin[2]]
+            vimg = plt.imshow(transpose(self.v[:, 0, :]), extent=imsize, vmin=round(amin(self.v), 1) - 0.05,
+                              vmax=round(amax(self.v) + 0.05, 1), cmap=cm.jet, origin='upper')
+            plt.xlabel('X')
+            plt.ylabel('Z')
+            plt.colorbar()
+            plt.savefig("./%s.pdf" % self.type)
+            plt.clf()
 
-        ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
-        ani.save("./%s.mp4" % self.type, fps=30, codec='libx264', bitrate=1800)
-        #plt.ion()
-        #plt.show()		# Showing plot prevents other files from rendering
-        #plt.close()
+        else:
+            Z = linspace(0, model.number[2] * model.spacing[2], model.number[2]) + model.spacing[2]
+            imsize = [model.origin[0], model.size[0] + model.origin[0], model.size[1] + model.origin[1], model.origin[1]]
+            fig = plt.figure(figsize=(output.hres / output.sres, output.hres / (output.sres * output.hratio)),
+                             dpi=output.sres)
+            vimg = plt.imshow(transpose(self.v[:, :, 0]), extent=imsize, vmin=round(amin(self.v), 1) - 0.05,
+                              vmax=round(amax(self.v) + 0.05, 1), cmap=cm.jet)
+            vtitle = plt.title('')
+            plt.xlabel('X')
+            plt.ylabel('Y')
+            plt.colorbar()
+
+            def animate(ii):
+                vimg.set_array(transpose(self.v[:, :, ii]))
+                vtitle.set_text("%s Plot (Z = %1.2fkm)" % (self.name, Z[ii]))
+                return vimg, vtitle
+
+            ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
+            ani.save("./%s.mp4" % self.type, fps=30, codec='libx264', bitrate=1800)
+            #plt.ion()
+            #plt.show()		# Showing plot prevents other files from rendering
+            #plt.close()
 
 
 # Trace files
@@ -330,12 +343,12 @@ class Tfile:
     def plot(self, output):
         plt.figure(figsize=output.fsize, dpi=output.dpi)
         for ii in range(0, len(self.v)):
-            imsize = [self.t[0], self.t[-1], self.x[ii][-1], self.x[ii][0]]
+            imsize = [self.x[ii][0], self.x[ii][-1], self.t[-1], self.t[0]]
             lim = amax(absolute(self.v[ii])) / output.scale_sat
-            plt.imshow(self.v[ii], extent=imsize, vmin=-lim, vmax=lim, cmap=cm.gray, origin='upper')
+            plt.imshow(transpose(self.v[ii]), extent=imsize, vmin=-lim, vmax=lim, cmap= cm.gray, origin='upper', aspect='auto')
             plt.title("%s-Velocity for Trace #%i" % (self.comp.upper(), ii))
-            plt.xlabel('Time (s)')
-            plt.ylabel('Offset (km)')
+            plt.ylabel('Time (s)')
+            plt.xlabel('Offset (km)')
             plt.colorbar()
             plt.savefig("Trace_%i_v%s.pdf" % (ii, self.comp))
             plt.clf()
@@ -412,7 +425,7 @@ class Vfile:
         scale = zeros((nframes, 1))
         win = ones((scale_len, 1))
         for ii in range(0, nframes):
-            scale[ii] = amax(absolute(self.v[:, :, ii]))
+            scale[ii] = max(amax(absolute(self.v[:, :, ii])), 1e-10) * 0.025
         scale = convolve(squeeze(scale), squeeze(win), mode='same') / output.scale_sat
         if (self.writestep == 0):
             scale[:scale_fix] = scale[scale_fix]
@@ -422,18 +435,19 @@ class Vfile:
         fig = plt.figure(figsize=(output.hres / output.sres, output.hres / (output.sres * output.hratio)),
                          dpi=output.sres)
         imsize = [self.x[0], self.x[-1], self.y[-1], self.y[0]]
-        vimg = plt.imshow(self.v[:, :, 0], extent=imsize, vmin=-scale[0], vmax=scale[0], cmap=cm.RdBu)
+        vimg = plt.imshow(transpose(self.v[:, :, 0]), extent=imsize, vmin=-scale[0], vmax=scale[0], cmap=cm.RdBu)
         vtitle = plt.title('')
         plt.xlabel(comp[self.dir][0])
         plt.ylabel(comp[self.dir][1])
         plt.colorbar()
 
         def animate(ii):
-            vimg.set_array(self.v[:, :, ii])
+            vimg.set_array(transpose(self.v[:, :, ii]))
             vimg.set_clim(-scale[ii], scale[ii])
             vtitle.set_text("%s for %s=%s km (t=%1.2e s)" % (self.type, self.dir, self.loc, self.t[ii]))
             return vimg, vtitle
 
+        verbose.level = 'debug'
         ani = animation.FuncAnimation(fig, animate, frames=self.v.shape[2], interval=20, blit=False, repeat=False)
         if (self.writestep == 0):
             ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264', bitrate=1800)
