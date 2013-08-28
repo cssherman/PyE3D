@@ -137,7 +137,7 @@ class Output:
         self.sres = 50                # Screen resolution
         self.dpi = 150                # Print resolution
         self.fsize = (4, 3)           # Print size
-        self.scale_sat = 1            # Colorbar saturation
+        self.scale_sat = 50           # Colorbar saturation
 
         #Add one trace and movie by default
         self.movies = [Movies()]
@@ -245,7 +245,7 @@ class Mfile:
             plt.xlabel('X')
             plt.ylabel('Z')
             plt.colorbar()
-            plt.savefig("./%s.pdf" % self.type)
+            plt.savefig("./%s.eps" % self.type)
             plt.clf()
 
         else:
@@ -347,10 +347,11 @@ class Tfile:
             lim = amax(absolute(self.v[ii])) / output.scale_sat
             plt.imshow(transpose(self.v[ii]), extent=imsize, vmin=-lim, vmax=lim, cmap= cm.gray, origin='upper', aspect='auto')
             plt.title("%s-Velocity for Trace #%i" % (self.comp.upper(), ii))
-            plt.ylabel('Time (s)')
-            plt.xlabel('Offset (km)')
-            plt.colorbar()
-            plt.savefig("Trace_%i_v%s.pdf" % (ii, self.comp))
+            plt.ylabel('Time (ms)')
+            plt.xlabel('Offset (m)')
+            plt.gcf().subplots_adjust(bottom=0.15, left=0.15)
+            # plt.colorbar()
+            plt.savefig("Trace_%i_v%s.eps" % (ii, self.comp))
             plt.clf()
 
 
