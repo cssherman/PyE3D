@@ -199,7 +199,7 @@ def e3d_wavelet(model, source):
     gd = 0.05
     slength = 200
 
-    # Find length and std of gauss window
+    # Find length and std of gaussian window
     time_off = source.off / (2 * model.dt)
     time_off = min(model.timesteps, max(0, round(time_off)))
     time_buf = 2 * model.timesteps + 4 * time_off

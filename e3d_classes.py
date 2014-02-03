@@ -412,7 +412,7 @@ class Vfile:
         scale = zeros((nframes, 1))
         win = ones((scale_len, 1))
         for ii in range(0, nframes):
-            scale[ii] = amax(absolute(self.v[:, :, ii]))
+            scale[ii] = max(amax(absolute(self.v[:, :, ii])), 1e-10) * 0.05
         scale = convolve(squeeze(scale), squeeze(win), mode='same') / output.scale_sat
         if (self.writestep == 0):
             scale[:scale_fix] = scale[scale_fix]

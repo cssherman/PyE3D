@@ -472,3 +472,5 @@ def run_post():
                 del movfile
             except:
                 print("     (No movie files rendered)")
+
+        print "Finished"
