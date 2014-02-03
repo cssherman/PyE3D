@@ -44,10 +44,11 @@ class GUIFramework(Frame):
         ttkstyle.configure('.', font=self.BasicFont)
 
         self.master.title("PyE3D Gui")
+        self.master.protocol('WM_DELETE_WINDOW', quit)
         self.Create_Main()
 
     def quit(self):
-        self.master.quit()
+        self.master.destroy()
 
     def Create_Main(self):
         # Create notebook and subframes
@@ -101,7 +102,7 @@ class GUIFramework(Frame):
         enrow = [2, 2, 2, 3, 3, 3, 4, 4, 4, 5]
         encol = [2, 4, 6, 2, 4, 6, 2, 4, 6, 2]
         drrow = [9, 10, 11, 14, 15, 16, 17]
-        drval = [('Reflecting', 'Quiet', 'Surface'), ('No', 'Yes'), ('No', 'Yes'), ('No', 'Yes'), ('Elastic', 'Acoustic'), ('No', 'Yes'), ('2', '3'), ('No', 'Yes')]
+        drval = [('Reflecting', 'Quiet', 'Surface', 'Surface (acousitc)'), ('No', 'Yes'), ('No', 'Yes'), ('No', 'Yes'), ('Elastic', 'Acoustic'), ('No', 'Yes'), ('2', '3'), ('No', 'Yes')]
 
         # Store Handles
         self.lbText, self.enText, self.drBox = self.Create_BasicFrame(self.f1, seprow, txt, txtrow, txtcol, txtbold, enrow, encol, drval, drrow)
@@ -206,14 +207,15 @@ class GUIFramework(Frame):
         #-----------------------------------------------------------------------------------
         # Rendering Options (Frame 7)
         #-----------------------------------------------------------------------------------
-        seprow = [4, 8]
+        seprow = [4, 8, 12]
         txt = ['Render Outputs', 'Models:', 'Traces:', 'Movies:', '', 'Output Decimation', 'Time:', 'nt', 'Space:',
-               'nx', '', 'Filtering (not enabled in this version)', 'Type:', 'Range:', '   f1', '   f2']
-        txtrow = [0, 1, 2, 3, 4, 5, 6, 6, 7, 7, 8, 9, 10, 11, 11, 11]
-        txtcol = [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 3]
-        txtbold = [0, 5, 11]
-        enrow = [6, 7, 11, 11]
-        encol = [2, 2, 2, 4]
+               'nx', '', 'Filtering (not enabled in this version)', 'Type:', 'Range:', '   f1', '   f2', '', 'Etc.',
+               'Saturation']
+        txtrow = [0, 1, 2, 3, 4, 5, 6, 6, 7, 7, 8, 9, 10, 11, 11, 11, 12, 13, 14]
+        txtcol = [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 3, 0, 0, 0]
+        txtbold = [0, 5, 11, 17]
+        enrow = [6, 7, 11, 11, 14]
+        encol = [2, 2, 2, 4, 2]
         drrow = [1, 2, 3, 10]
         drval = [('No', 'Yes'), ('No', 'Yes'), ('No', 'Yes'), ('None', 'Lowpass', 'Highpass', 'Bandpass')]
 
@@ -562,12 +564,13 @@ class GUIFramework(Frame):
                 'Highpass': [['Corner Frequency:', '', '   f2'], [0, 1]],
                 'Bandpass': [['Corner Frequencies:', '   f1', '   f2'], [1, 1]]}
 
-        for ii in range(0, 4):
+        for ii in range(0, 5):
                 self.rend_enText[ii].delete(0, END)
         self.rend_enText[0].insert(0, self.config.output.dec_time)
         self.rend_enText[1].insert(0, self.config.output.dec_space)
         self.rend_enText[2].insert(0, self.config.output.bandpass[0])
         self.rend_enText[3].insert(0, self.config.output.bandpass[1])
+        self.rend_enText[4].insert(0, self.config.output.scale_sat)
         self.rend_drBox[0].current(self.config.output.model)
         self.rend_drBox[1].current(self.config.output.trace)
         self.rend_drBox[2].current(self.config.output.movie)
@@ -681,6 +684,7 @@ class GUIFramework(Frame):
         self.config.output.dec_space = int(self.rend_enText[1].get())
         self.config.output.bandpass[0] = float(self.rend_enText[2].get())
         self.config.output.bandpass[1] = float(self.rend_enText[3].get())
+        self.config.output.scale_sat = float(self.rend_enText[4].get())
         self.config.output.model = self.rend_drBox[0].current()
         self.config.output.trace = self.rend_drBox[1].current()
         self.config.output.movie = self.rend_drBox[2].current()
