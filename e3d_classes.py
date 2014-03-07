@@ -182,8 +182,8 @@ class Region:
         target = (1 - self.r) * target + self.r * source
         return target
 
-    def scale(self, target, mn, sd):
-        target = (1 - self.r) * target + self.r * (sd * target + 1) * mn
+    def scale(self, source, target, mn, sd):
+        target = (1 - self.r) * target + self.r * (sd * source + 1) * mn
         return target
 
 
@@ -229,6 +229,26 @@ class Mfile:
             tmp = fromfile(fid, dtype='float32', count=nelements)
         self.v = swapaxes(reshape(tmp, mshape, order='F'), 1, 2).astype('float')
 
+    def readfromcsv(self, model, target, type):
+        # Read data from csv file (format = X, Y, Z, Vp, Vs, Dens)
+        interp_data = genfromtxt(target, delimiter=',')
+
+        # If file looks 1D, choose nearest neighbor interpolation, otherwise choose linear interpolation
+        dx = amax(interp_data[:, 0]) - amin(interp_data[:, 0])
+        dy = amax(interp_data[:, 1]) - amin(interp_data[:, 1])
+        dz = amax(interp_data[:, 2]) - amin(interp_data[:, 2])
+        test = sorted([dx, dy, dz])
+        if (test[0] >= 10*test[1]):
+            imethod = 'nearest'
+        else:
+            imethod = 'linear'
+
+        # Interpolate
+        grid_x, grid_y, grid_z = meshgrid(linspace(model.origin[0], model.origin[0]+model.size[0], model.number[0]),
+                                          linspace(model.origin[1], model.origin[1]+model.size[1], model.number[1]),
+                                          linspace(model.origin[2], model.origin[2]+model.size[2], model.number[2]))
+        self.v = interpolate.griddat(interp_data[:, :3], interp_data[type+3], (grid_x, grid_y, grid_z), method=imethod)
+
     def write(self, model, target):
         nelements = model.number[0] * model.number[1] * model.number[2]
         tmp = reshape(swapaxes(self.v, 1, 2), nelements, order='F')
@@ -252,8 +272,11 @@ class Mfile:
             vtitle.set_text("%s Plot (Z = %1.2fkm)" % (self.name, Z[ii]))
             return vimg, vtitle
 
-        ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
-        ani.save("./%s.mp4" % self.type, fps=30, codec='libx264', bitrate=1800)
+        try:
+            ani = animation.FuncAnimation(fig, animate, frames=len(Z), interval=20, blit=False, repeat=False)
+            ani.save("./%s.mp4" % self.type, fps=30, codec='libx264', bitrate=1800)
+        except IndexError:
+            print 'To render movies, make sure that ffmpeg is installed!'
         #plt.ion()
         #plt.show()		# Showing plot prevents other files from rendering
         #plt.close()
@@ -434,11 +457,14 @@ class Vfile:
             vtitle.set_text("%s for %s=%s km (t=%1.2e s)" % (self.type, self.dir, self.loc, self.t[ii]))
             return vimg, vtitle
 
-        ani = animation.FuncAnimation(fig, animate, frames=self.v.shape[2], interval=20, blit=False, repeat=False)
-        if (self.writestep == 0):
-            ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264', bitrate=1800)
-        else:
-            ani.save("./%s_%s_%s_%i.mp4" % (self.dir, self.loc, self.type, self.writestep), fps=30, codec='libx264', bitrate=1800)
+        try:
+            ani = animation.FuncAnimation(fig, animate, frames=self.v.shape[2], interval=20, blit=False, repeat=False)
+            if (self.writestep == 0):
+                ani.save("./%s_%s_%s.mp4" % (self.dir, self.loc, self.type), fps=30, codec='libx264', bitrate=1800)
+            else:
+                ani.save("./%s_%s_%s_%i.mp4" % (self.dir, self.loc, self.type, self.writestep), fps=30, codec='libx264', bitrate=1800)
+        except IndexError:
+            print 'To render movies, make sure that ffmpeg is installed!'
         self.writestep += 1
 
 

@@ -252,7 +252,8 @@ class GUIFramework(Frame):
             encol = [2, 4, 2, 4, 2, 4, 2, 4, 2, 2, 4, 6, 2, 4, 6, 2, 4, 6, 2, 4, 6]
             drrow = [7, 12]
             drval = [('Homogeneous', 'Random', 'Fractal'), ('Rectangle', 'Sphere', 'Cylinder', 'Polynomial Surface',
-                                                            'Planar Surface', 'Open Box', 'Entire Domain')]
+                                                            'Planar Surface', 'Open Box', 'Entire Domain',
+                                                            'Interp from File')]
 
             # Store Handles
             lbText, enText, drBox = self.Create_BasicFrame(self.mf[jj], seprow, txt, txtrow, txtcol, txtbold, enrow, encol, drval, drrow)
@@ -444,7 +445,9 @@ class GUIFramework(Frame):
                 'Open Box': [['Width:', '   N', '', '', '', '', '', '', '', '', '', ''],
                              [1, 0, 0, 0, 0, 0, 0, 0, 0]],
                 'Entire Domain': [['', '', '', '', '', '', '', '', '', '', '', ''],
-                                  [0, 0, 0, 0, 0, 0, 0, 0, 0]]}
+                                  [0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                'Interp from File': [['CSV File (X, Y, Z, Vp, Vs, Dens):', 'Path:', '', '', '', '', '', '', '', '', '', ''],
+                                    [1, 0, 0, 0, 0, 0, 0, 0, 0]]}
 
         for ii in range(0, len(self.config.material)):
             for jj in range(0, 21):
@@ -638,8 +641,21 @@ class GUIFramework(Frame):
             self.config.material[ii].dist[2] = float(self.material_enText[ii][10].get())
             self.config.material[ii].dist[3] = float(self.material_enText[ii][11].get())
             self.config.material[ii].type = self.material_drBox[ii][1].current() + 1
-            for jj in range(0, 9):
-                self.config.material[ii].geo[jj] = float(self.material_enText[ii][jj + 12].get())
+            if (self.config.material[ii].type <= 7):
+                # Geometric Regions
+                for jj in range(0, 9):
+                    try:
+                        self.config.material[ii].geo[jj] = float(self.material_enText[ii][jj + 12].get())
+                    except ValueError:
+                        self.config.material[ii].geo[jj] = 0.0
+            else:
+                # Interpolation Option
+                tmp_path = self.material_enText[ii][12].get()
+                if os.path.exists(tmp_path):
+                    self.config.material[ii].geo[0] = tmp_path
+                else:
+                    self.config.material[ii].geo[0] = self.config.path.link + 'file.csv'  # Default path if not set
+
 
         # Source Page
         for ii in range(0, len(self.config.source)):
@@ -735,7 +751,7 @@ class GUIFramework(Frame):
     def GUI_Restore(self):
         self.config.default()
         self.Create_MaterialFrames(len(self.config.material))
-        self.Create_SourceFrames(len(self.config.sources))
+        self.Create_SourceFrames(len(self.config.source))
         self.Create_TraceFrames(len(self.config.output.traces))
         self.Create_MovieFrames(len(self.config.output.movies))
         self.Update_Screen()

@@ -122,10 +122,14 @@ def run_simulation():
                 print("Writing %s" % ft3[ii])
                 velocity.v = fractal.v
                 for jj in range(0, n_regions):
-                    mn = config.material[jj].mn[ii]
-                    sd = config.material[jj].sd[ii]
-                    region.load(jj)
-                    velocity.v = region.scale(velocity.v, mn, sd)
+                    if (config.material[jj].type <= 7):
+                        mn = config.material[jj].mn[ii]
+                        sd = config.material[jj].sd[ii]
+                        region.load(jj)
+                        velocity.v = region.scale(fractal.v, velocity.v, mn, sd)
+                    else:
+                        velocity.readfromcsv(config.model, config.material[jj].geo[0], ii)
+
                 if (ii >= 3) & (config.boundary.atten == 1):
                     region.load('atten')
                     velocity.v = region.scale(velocity.v, config.boundary.atten_val, 0)
@@ -375,10 +379,14 @@ def render():
             print("Writing %s" % ft3[ii])
             velocity.v = fractal.v
             for jj in range(0, n_regions):
-                mn = config.material[jj].mn[ii]
-                sd = config.material[jj].sd[ii]
-                region.load(jj)
-                velocity.v = region.scale(velocity.v, mn, sd)
+                if (config.material[jj].type <= 7):
+                    mn = config.material[jj].mn[ii]
+                    sd = config.material[jj].sd[ii]
+                    region.load(jj)
+                    velocity.v = region.scale(fractal.v, velocity.v, mn, sd)
+                else:
+                    velocity.readfromcsv(config.model, config.material[jj].geo[0], ii)
+
             if (ii >= 3) & (config.boundary.atten == 1):
                 region.load('atten')
                 velocity.v = region.scale(velocity.v, config.boundary.atten_val, 0)

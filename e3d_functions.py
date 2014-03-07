@@ -99,63 +99,67 @@ def e3d_locate(model, rtype, geometry, rnumber):
         region[:] = 1
 
     elif (rtype == 8):
-        print 'Region #' + str(rnumber) + ' - Piecewise Surface'
-        segments = int((len(geometry) - 4) / 2)
-        thz = geometry[3] * pi / 180
-        thy = 0
-        X, Y, Z = e3d_transform(X - geometry[0], Y - geometry[1], Z - geometry[2], thz, thy, 0, 0, 0)
+        print 'Region #' + str(rnumber) + ' - Interpolation from File'
+        region[:] = 1
 
-        for ii in range(0, segments):
-            xstart = geometry[2 * ii + 4]
-            zstart = geometry[2 * ii + 5]
-            xend = geometry[2 * ii + 6]
-            zend = geometry[2 * ii + 7]
-            slope = (zend - zstart) / (xend - xstart)
-            test = Z - slope * (X - xstart) - zstart
-            region = region + ((X >= xstart) & (X <= xend) & (test <= 0))
-
-    elif (rtype == 9):
-        print 'Region #' + str(rnumber) + ' - Tunnel'
-        segments = int((len(geometry) - 5) / 3)
-        width = geometry[0]
-        height = geometry[1]
-        X = X - geometry[2]
-        Y = Y - geometry[3]
-        Z = Z - geometry[4]
-        thz_old = 0
-        thy_old = 0
-
-        for ii in range(0, segments):
-            thz = geometry[5 + ii * 3] * pi / 180
-            thy = geometry[6 + ii * 3] * pi / 180
-            L = geometry[7 + ii * 3]
-            X, Y, Z = e3d_transform(X, Y, Z, thz, thy, thz_old, thy_old, 1)
-
-            #Determine distance required to close tunnel
-            if (ii > 0):
-                thz_old = geometry[5 + (ii - 1) * 3] * pi / 180
-                thy_old = geometry[6 + (ii - 1) * 3] * pi / 180
-                Lback1 = min((width * tan(0.5 * (thz - thz_old))) ** 2, width ** 2)
-                Lback2 = min((height * tan(0.5 * (thy - thy_old))) ** 2, height ** 2)
-                Lback = -0.5 * sqrt(Lback1 ** 2 + Lback2 ** 2)
-            else:
-                Lback = 0
-
-            if (ii < segments - 1):
-                thz_new = geometry[5 + (ii + 1) * 3] * pi / 180
-                thy_new = geometry[6 + (ii + 1) * 3] * pi / 180
-                Lfor1 = min((width * tan(0.5 * (thz_new - thz))) ** 2, width ** 2)
-                Lfor2 = min((height * tan(0.5 * (thy_new - thy))) ** 2, height ** 2)
-                Lfor = -0.5 * sqrt(Lfor1 ** 2 + Lfor2 ** 2)
-            else:
-                Lfor = 0
-
-            # Logicals
-            region = region + (
-                (X >= Lback) & (X <= L + Lfor) & (absolute(Y) <= 0.5 * width) & (absolute(Z) <= 0.5 * height))
-            X = X - L
-            thz_old = thz
-            thy_old = thy
+    # elif (rtype == 8):
+    #     print 'Region #' + str(rnumber) + ' - Piecewise Surface'
+    #     segments = int((len(geometry) - 4) / 2)
+    #     thz = geometry[3] * pi / 180
+    #     thy = 0
+    #     X, Y, Z = e3d_transform(X - geometry[0], Y - geometry[1], Z - geometry[2], thz, thy, 0, 0, 0)
+    #
+    #     for ii in range(0, segments):
+    #         xstart = geometry[2 * ii + 4]
+    #         zstart = geometry[2 * ii + 5]
+    #         xend = geometry[2 * ii + 6]
+    #         zend = geometry[2 * ii + 7]
+    #         slope = (zend - zstart) / (xend - xstart)
+    #         test = Z - slope * (X - xstart) - zstart
+    #         region = region + ((X >= xstart) & (X <= xend) & (test <= 0))
+    #
+    # elif (rtype == 9):
+    #     print 'Region #' + str(rnumber) + ' - Tunnel'
+    #     segments = int((len(geometry) - 5) / 3)
+    #     width = geometry[0]
+    #     height = geometry[1]
+    #     X = X - geometry[2]
+    #     Y = Y - geometry[3]
+    #     Z = Z - geometry[4]
+    #     thz_old = 0
+    #     thy_old = 0
+    #
+    #     for ii in range(0, segments):
+    #         thz = geometry[5 + ii * 3] * pi / 180
+    #         thy = geometry[6 + ii * 3] * pi / 180
+    #         L = geometry[7 + ii * 3]
+    #         X, Y, Z = e3d_transform(X, Y, Z, thz, thy, thz_old, thy_old, 1)
+    #
+    #         #Determine distance required to close tunnel
+    #         if (ii > 0):
+    #             thz_old = geometry[5 + (ii - 1) * 3] * pi / 180
+    #             thy_old = geometry[6 + (ii - 1) * 3] * pi / 180
+    #             Lback1 = min((width * tan(0.5 * (thz - thz_old))) ** 2, width ** 2)
+    #             Lback2 = min((height * tan(0.5 * (thy - thy_old))) ** 2, height ** 2)
+    #             Lback = -0.5 * sqrt(Lback1 ** 2 + Lback2 ** 2)
+    #         else:
+    #             Lback = 0
+    #
+    #         if (ii < segments - 1):
+    #             thz_new = geometry[5 + (ii + 1) * 3] * pi / 180
+    #             thy_new = geometry[6 + (ii + 1) * 3] * pi / 180
+    #             Lfor1 = min((width * tan(0.5 * (thz_new - thz))) ** 2, width ** 2)
+    #             Lfor2 = min((height * tan(0.5 * (thy_new - thy))) ** 2, height ** 2)
+    #             Lfor = -0.5 * sqrt(Lfor1 ** 2 + Lfor2 ** 2)
+    #         else:
+    #             Lfor = 0
+    #
+    #         # Logicals
+    #         region = region + (
+    #             (X >= Lback) & (X <= L + Lfor) & (absolute(Y) <= 0.5 * width) & (absolute(Z) <= 0.5 * height))
+    #         X = X - L
+    #         thz_old = thz
+    #         thy_old = thy
 
     fid = open('region_' + str(rnumber) + '.pkl', 'wb')
     pickle.dump(region, fid, 2)
