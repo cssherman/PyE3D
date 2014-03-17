@@ -184,15 +184,18 @@ def e3d_transform(x, y, z, thz, thy, thz_old, thy_old, back):
 
 
 def e3d_gmail(toaddr, subject, body):
-    fromaddr = 'cssherman.matlab@gmail.com'
-    passwd = '1adam123'
-    msg = """\From: %s\nTo: %s\nSubject: %s\n\n%s""" % (fromaddr, toaddr, subject, body)
+    try:
+        fromaddr = 'cssherman.matlab@gmail.com'
+        passwd = '1adam123'
+        msg = """\From: %s\nTo: %s\nSubject: %s\n\n%s""" % (fromaddr, toaddr, subject, body)
 
-    server = smtplib.SMTP('smtp.gmail.com:587')
-    server.ehlo()
-    server.starttls()
-    server.login(fromaddr, passwd)
-    server.sendmail(fromaddr, toaddr, msg)
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.ehlo()
+        server.starttls()
+        server.login(fromaddr, passwd)
+        server.sendmail(fromaddr, toaddr, msg)
+    except:
+        pass
 
 
 def e3d_wavelet(model, source):

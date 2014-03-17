@@ -26,7 +26,7 @@ def run_simulation():
         #				Workspace Configuration
         #--------------------------------------------------------------------
         # Update configuration and print to screen
-        config.update(0)
+        config.update(loop)
         print("\n\n\nModel #%i out of %i" % (loop + 1, config.basic.loopnum))
         print("----------------------------------------------\n")
 
@@ -311,7 +311,7 @@ def run_simulation():
     # Cleanup
     log.close()
     print("\nFinished!\n")
-    e3d_gmail('4067502404@vtext.com', 'PyE3D', "%s Simulations completed successfuly!" % (loop + 1))
+    e3d_gmail('youremailhere', 'PyE3D', "%s Simulations completed successfuly!" % (loop + 1))
 
 
 def render():

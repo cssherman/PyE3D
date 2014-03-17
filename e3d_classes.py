@@ -167,6 +167,7 @@ class Path:
         self.log_msg = 'Test Model'
         self.oldmodel = os.path.expanduser('~/SeismicTools/E3D/')
         self.out = os.path.expanduser('~/SeismicTools/E3D/Results/')
+        self.email = 'youremail@gmail.com'
 
 
 class Region:

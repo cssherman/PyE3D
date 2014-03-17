@@ -114,19 +114,19 @@ class GUIFramework(Frame):
         txt = ['Model Setup', 'Timestep Size:', 'ct/dt', 'Number of Runs:', 'N', 'MPI Nodes:', 'nX', '   nY',
                '   nZ', '', 'Material Control', 'Independant Parameters:', 'Model Generation:', 'Multiple Runs:',
                '', 'Input/Output Paths', 'Output Location:', 'Logfile Location:', 'Linking Directory:', 'E3D Path:',
-               'Input Name:']
-        txtrow = [0, 1, 1, 2, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-        txtcol = [0, 0, 1, 0, 1, 0, 1, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+               'Input Name:','Alert address:']
+        txtrow = [0, 1, 1, 2, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        txtcol = [0, 0, 1, 0, 1, 0, 1, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         txtbold = [0, 10, 15]
-        enrow = [1, 2, 3, 3, 3, 11, 12, 13, 14, 15]
-        encol = [2, 2, 2, 4, 6, 1, 1, 1, 1, 1]
+        enrow = [1, 2, 3, 3, 3, 11, 12, 13, 14, 15, 16]
+        encol = [2, 2, 2, 4, 6, 1, 1, 1, 1, 1, 1]
         drrow = [6, 7, 8]
         drval = [('pvel', 'pvel, svel', 'pvel, svel, dens'), ('Create New', 'Copy Existing', 'Modify Existing'),
                  ('Independent', 'Create Initial')]
 
         # Store Handles
         self.adv_lbText, self.adv_enText, self.adv_drBox = self.Create_BasicFrame(self.f2, seprow, txt, txtrow, txtcol, txtbold, enrow, encol, drval, drrow)
-        for ii in range(5, 10):
+        for ii in range(5, 11):
             self.adv_enText[ii].configure(width=40)
             self.adv_enText[ii].grid(columnspan=5)
 
@@ -424,6 +424,7 @@ class GUIFramework(Frame):
         self.adv_enText[7].insert(0, self.config.path.link)
         self.adv_enText[8].insert(0, self.config.path.bin)
         self.adv_enText[9].insert(0, self.config.path.fin)
+        self.adv_enText[10].insert(0, self.config.path.email)
         self.adv_drBox[0].current(self.config.basic.degrees_free - 1)
         self.adv_drBox[1].current(self.config.basic.newmodel)
         self.adv_drBox[2].current(self.config.basic.multimodel)
@@ -495,7 +496,7 @@ class GUIFramework(Frame):
                       [0, 0, 0, 0, 0, 0, 0, 0, 0]],
                 'None': [['', '', '', '', '', '', '', '', '', '', ''],
                          [0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                'Moment Tensor': [['Tensor:', '   Mxx', '   Myy', '   Mzz', '   Mxy', '   Mxz', '   Myz', '', '', '', ''],
+                'Moment Tensor': [['Tensor:', '   Mxx', '   Myy', '   Mzz', '','   Mxy', '   Mxz', '   Myz', '', '', '', ''],
                                   [1, 1, 1, 1, 1, 1, 0, 0, 0]],
                 'Force': [['Direction:', '   Fx', '   Fy', '   Fz', '', '', '', '', '', '', ''],
                           [1, 1, 1, 0, 0, 0, 0, 0, 0]],
@@ -622,6 +623,7 @@ class GUIFramework(Frame):
         self.config.path.link = self.adv_enText[7].get()
         self.config.path.bin = self.adv_enText[8].get()
         self.config.path.fin = self.adv_enText[9].get()
+        self.config.path.email = self.adv_enText[10].get()
         self.config.basic.degrees_free = self.adv_drBox[0].current() + 1
         self.config.basic.newmodel = self.adv_drBox[1].current()
         self.config.basic.multimodel = self.adv_drBox[2].current()
