@@ -412,7 +412,7 @@ class GUIFramework(Frame):
         self.drBox[6].current(self.config.model.dims - 2)
 
         # Advanced Page
-        for ii in range(0, 10):
+        for ii in range(0, 11):
             self.adv_enText[ii].delete(0, END)
         self.adv_enText[0].insert(0, self.config.model.max_dtct)
         self.adv_enText[1].insert(0, self.config.basic.loopnum)
@@ -760,7 +760,10 @@ class GUIFramework(Frame):
 
     def GUI_AddMat(self):
         self.Update_Config()
-        frame = self.materialframes.index(self.materialframes.select()) + 1
+        try:
+            frame = self.materialframes.index(self.materialframes.select()) + 1
+        except:
+            frame = 0
         self.config.addmaterial(frame)
         self.Create_MaterialFrames(len(self.config.material))
         self.Update_Screen()
@@ -774,7 +777,10 @@ class GUIFramework(Frame):
 
     def GUI_AddSource(self):
         self.Update_Config()
-        frame = self.sourceframes.index(self.sourceframes.select()) + 1
+        try:
+            frame = self.sourceframes.index(self.sourceframes.select()) + 1
+        except:
+            frame = 0
         self.config.addsource(frame)
         self.Create_SourceFrames(len(self.config.source))
         self.Update_Screen()
@@ -788,7 +794,10 @@ class GUIFramework(Frame):
 
     def GUI_AddTrace(self):
         self.Update_Config()
-        frame = self.traceframes.index(self.traceframes.select()) + 1
+        try:
+            frame = self.traceframes.index(self.traceframes.select()) + 1
+        except:
+            frame = 0
         self.config.output.addtrace(frame)
         self.Create_TraceFrames(len(self.config.output.traces))
         self.Update_Screen()
@@ -802,7 +811,10 @@ class GUIFramework(Frame):
 
     def GUI_AddMovie(self):
         self.Update_Config()
-        frame = self.movieframes.index(self.movieframes.select()) + 1
+        try:
+            frame = self.movieframes.index(self.movieframes.select()) + 1
+        except:
+            frame = 0
         self.config.output.addmovie(frame)
         self.Create_MovieFrames(len(self.config.output.movies))
         self.Update_Screen()

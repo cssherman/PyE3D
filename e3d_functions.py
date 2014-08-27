@@ -1,5 +1,21 @@
 from e3d_classes import *
 
+def update_config(config, loop):
+    
+    # Modify atten_val for testing
+    config.boundary.atten_val = 1
+    config.boundary.atten_thick = 40
+
+    # Modify fractal dimension
+    #print 'Note: Modifying fractal dimension'
+    #beta = linspace(-0.5, 0.5, 11)
+    #for region in config.material:
+    #    region.dist = [beta[loop], beta[loop], -1.5, -1.5, -1.5]
+    #
+    #config.path.log_msg = "Tunnel Model %s:  beta = %f" % (loop, beta[loop])
+
+    return config
+
 
 def e3d_fractal(model, dist):
     # Setup a random-normal fractal model
@@ -214,7 +230,7 @@ def e3d_wavelet(model, source):
 
     # Generate and trim the window
     W = signal.gaussian(time_buf, sd)
-    if (source.type == 1):
+    if (source.wav == 1):
         W = diff(W)
     W2 = W[int(0.5 * time_buf - time_off):int(0.5 * time_buf - time_off + model.timesteps)]
     W2[:slength] = W2[:slength] * linspace(0, 1, slength)

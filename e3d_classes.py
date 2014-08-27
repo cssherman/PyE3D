@@ -60,9 +60,6 @@ class Config:
         pickle.dump(self.__dict__, back, 2)
         back.close()
 
-    def update(self, loop):
-        self.path.log_msg = "Test %s" % loop
-
 
 class Basic:
     def __init__(self):
@@ -93,7 +90,7 @@ class Material():
     def __init__(self):
         self.mn = [3.0, 1.73, 2.7, 40.0, 40.0]
         self.sd = [0.01, 0.01, 0.0, 0.0, 0.0]
-        self.dist = [0.0, 1.0, 1.0, 1.0]
+        self.dist = [0.0, 0.0, 0.0, 0.0, 0.0]
         self.type = 7
         self.geo = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -261,7 +258,7 @@ class Mfile:
         imsize = [model.origin[0], model.size[0] + model.origin[0], model.origin[1], model.size[1] + model.origin[1]]
         fig = plt.figure(figsize=(output.hres / output.sres, output.hres / (output.sres * output.hratio)),
                          dpi=output.sres)
-        vimg = plt.imshow(self.v[:, :, 0], extent=imsize, vmin=round(amin(self.v), 1) - 0.05, vmax=round(amax(self.v) + 0.05, 1),
+        vimg = plt.imshow(transpose(self.v[:, :, 0]), extent=imsize, vmin=round(amin(self.v), 1) - 0.05, vmax=round(amax(self.v) + 0.05, 1),
                           cmap=cm.jet)
         vtitle = plt.title('')
         plt.xlabel('X')
@@ -269,7 +266,7 @@ class Mfile:
         plt.colorbar()
 
         def animate(ii):
-            vimg.set_array(self.v[:, :, ii])
+            vimg.set_array(transpose(self.v[:, :, ii]))
             vtitle.set_text("%s Plot (Z = %1.2fkm)" % (self.name, Z[ii]))
             return vimg, vtitle
 
@@ -339,28 +336,36 @@ class Tfile:
             self.dir.append(trace.dir.lower())
             self.corr.append(trace.corr)
 
-    def correct(self, source):
-        comp = {'x': [0, 1, 2], 'y': [1, 0, 2], 'z': [2, 0, 1]}
-        for ii in range(0, len(self.v)):
-            r = sqrt((self.x[ii] - source.loc[comp[self.dir[ii]][0]]) ** 2
-                     + (self.loc[ii][comp[self.dir[ii]][1]] - source.loc[comp[self.dir[ii]][0]]) ** 2
-                     + (self.loc[ii][comp[self.dir[ii]][2]] - source.loc[comp[self.dir[ii]][0]]) ** 2)
-            if (self.corr[ii] > 0):
-                if (self.corr[ii] == 2):
+    def correct(self, source, ctype='time'):
+        if (ctype == 'body') or (ctype == 'surface'):
+            comp = {'x': [0, 1, 2], 'y': [1, 0, 2], 'z': [2, 0, 1]}
+            for ii in range(0, len(self.v)):
+                r = sqrt((self.x[ii] - source.loc[comp[self.dir[ii]][0]]) ** 2
+                         + (self.loc[ii][comp[self.dir[ii]][1]] - source.loc[comp[self.dir[ii]][0]]) ** 2
+                         + (self.loc[ii][comp[self.dir[ii]][2]] - source.loc[comp[self.dir[ii]][0]]) ** 2)
+                if (ctype == 'surface'):
                     r = sqrt(r)
                 for jj in range(0, size(self.v[ii], 0)):
                     self.v[ii][jj][:] = self.v[ii][jj][:] * r[jj]
+        elif (ctype == 'time'):
+            Vcorr = 0.92  
+            corr = reshape(array(sqrt(abs(self.t - source.off) / Vcorr)), (1, 1, len(self.t)))
+            for ii in range(0, len(self.v)):
+                for jj in range(0, size(self.v[ii], 0)):
+                    self.v[ii][jj][:] = self.v[ii][jj][:]*corr
+
+
 
     def plot(self, output):
         plt.figure(figsize=output.fsize, dpi=output.dpi)
         for ii in range(0, len(self.v)):
             imsize = [self.t[0], self.t[-1], self.x[ii][-1], self.x[ii][0]]
             lim = amax(absolute(self.v[ii])) / output.scale_sat
-            plt.imshow(self.v[ii], extent=imsize, vmin=-lim, vmax=lim, cmap=cm.gray, origin='upper')
+            plt.imshow(self.v[ii], extent=imsize, vmin=-lim, vmax=lim, cmap=cm.gray, origin='upper', aspect='auto')
             plt.title("%s-Velocity for Trace #%i" % (self.comp.upper(), ii))
             plt.xlabel('Time (s)')
             plt.ylabel('Offset (km)')
-            plt.colorbar()
+            #plt.colorbar()
             plt.savefig("Trace_%i_v%s.pdf" % (ii, self.comp))
             plt.clf()
 
@@ -446,14 +451,14 @@ class Vfile:
         fig = plt.figure(figsize=(output.hres / output.sres, output.hres / (output.sres * output.hratio)),
                          dpi=output.sres)
         imsize = [self.x[0], self.x[-1], self.y[-1], self.y[0]]
-        vimg = plt.imshow(self.v[:, :, 0], extent=imsize, vmin=-scale[0], vmax=scale[0], cmap=cm.RdBu)
+        vimg = plt.imshow(transpose(self.v[:, :, 0]), extent=imsize, vmin=-scale[0], vmax=scale[0], cmap=cm.RdBu)
         vtitle = plt.title('')
         plt.xlabel(comp[self.dir][0])
         plt.ylabel(comp[self.dir][1])
         plt.colorbar()
 
         def animate(ii):
-            vimg.set_array(self.v[:, :, ii])
+            vimg.set_array(transpose(self.v[:, :, ii]))
             vimg.set_clim(-scale[ii], scale[ii])
             vtitle.set_text("%s for %s=%s km (t=%1.2e s)" % (self.type, self.dir, self.loc, self.t[ii]))
             return vimg, vtitle

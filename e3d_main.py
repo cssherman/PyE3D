@@ -26,7 +26,7 @@ def run_simulation():
         #				Workspace Configuration
         #--------------------------------------------------------------------
         # Update configuration and print to screen
-        config.update(loop)
+        config = update_config(config, loop)
         print("\n\n\nModel #%i out of %i" % (loop + 1, config.basic.loopnum))
         print("----------------------------------------------\n")
 
@@ -132,7 +132,7 @@ def run_simulation():
 
                 if (ii >= 3) & (config.boundary.atten == 1):
                     region.load('atten')
-                    velocity.v = region.scale(velocity.v, config.boundary.atten_val, 0)
+                    velocity.v = region.scale(fractal.v, velocity.v, config.boundary.atten_val, 0) 
 
                 # Record important information about the model, and write:
                 config.model.v_avg[ii] = mean(velocity.v)
@@ -167,7 +167,7 @@ def run_simulation():
             courant = 0.606
 
         dt = (courant * config.model.max_dtct * config.model.spacing[0]) / config.model.v_max[0]
-        config.model.dt = float("%1.0e" % dt)
+        config.model.dt = float("%2.1e" % dt)
         config.model.timesteps = int(config.model.time / config.model.dt)
 
         # Grid and input file sizes
@@ -181,7 +181,7 @@ def run_simulation():
         for ii in range(0, len(config.source)):
             if (config.source[ii].freq > freqlim):
                 config.source[ii].freq = freqlim
-                print 'Warning: Desired source frequency too large...  reducing f'
+                print 'Warning: Desired source frequency too large...  reducing f to %f Hz' % (freqlim)
             sfreq.append(config.source[ii].freq)
         fmean = mean(sfreq)
 
@@ -222,7 +222,7 @@ def run_simulation():
                 fid.write("parallel nx=%i ny=%i nz=%i\n" % (config.basic.multicore[0], config.basic.multicore[1], config.basic.multicore[2]))
 
             # Time options
-            fid.write("time t=%i dt=%1.0e\n" % (config.model.timesteps, config.model.dt))
+            fid.write("time t=%i dt=%2.1e\n" % (config.model.timesteps, config.model.dt))
 
             # Velocity, density, attenuation options
             fid.write("block p=%s s=%s r=%s" % (config.material[0].mn[0], config.material[0].mn[1], config.material[0].mn[2]))
