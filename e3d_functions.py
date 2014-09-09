@@ -19,7 +19,7 @@ def update_config(config, loop):
 
 def e3d_fractal(model, dist):
     # Setup a random-normal fractal model
-    if dist[0] == -0.5 * model.dims:
+    if dist[0] <= -1.5:
         fractal = random.normal(0, 1, model.number)
     else:
         # Build the spectral filter:
