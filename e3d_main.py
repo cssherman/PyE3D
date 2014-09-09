@@ -149,8 +149,11 @@ def run_simulation():
         if (config.output.model == 1):
             print "\nRendering models"
             for ii in range(0, n_inputs):
-                velocity.read(config.model, "./%s.pv" % (ft[ii]))
-                velocity.plot(config.model, config.output)
+                try:
+                    velocity.read(config.model, "./%s.pv" % (ft[ii]))
+                    velocity.plot(config.model, config.output)
+                except:
+                    print "Failed to render ./%s.pv" % (ft[ii])
 
         del fractal, region, velocity
         rm = glob.glob('./region*.pkl')
@@ -406,8 +409,11 @@ def render():
     if (config.output.model == 1):
         print "\nRendering models"
         for ii in range(0, n_inputs):
-            velocity.read(config.model, "./%s.pv" % (ft[ii]))
-            velocity.plot(config.model, config.output)
+            try:
+                velocity.read(config.model, "./%s.pv" % (ft[ii]))
+                velocity.plot(config.model, config.output)
+            except:
+                print "Failed to render ./%s.pv" % (ft[ii])
 
     del fractal, region, velocity
     rm = glob.glob('./region*.pkl') + glob.glob('./*.pv')

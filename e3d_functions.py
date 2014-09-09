@@ -21,6 +21,9 @@ def e3d_fractal(model, dist):
     # Setup a random-normal fractal model
     if dist[0] <= -1.5:
         fractal = random.normal(0, 1, model.number)
+    elif (min(dist[1:]) <= 0):
+        fractal = random.normal(0, 1, model.number)
+        print 'Improper fractal scaling... Reverting to random normal distribution'
     else:
         # Build the spectral filter:
         f = 1 / (2 * model.spacing[1])
